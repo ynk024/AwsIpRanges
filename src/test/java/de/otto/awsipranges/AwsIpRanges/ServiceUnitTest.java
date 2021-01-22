@@ -25,14 +25,12 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 public class ServiceUnitTest {
-
     @Autowired
     private DataService dataService;
-
     @MockBean
     private RestTemplate restTemplate;
-
     private DataWrapper dummyData;
+    private final String SOURCE_URL = "https://ip-ranges.amazonaws.com/ip-ranges.json";
 
     @BeforeEach
     public void setup(){
@@ -46,40 +44,38 @@ public class ServiceUnitTest {
 
     @Test
     void shouldTestDataIsNull(){
-        when(restTemplate.getForObject("https://ip-ranges.amazonaws.com/ip-ranges.json", DataWrapper.class)).thenReturn(null);
+        when(restTemplate.getForObject(SOURCE_URL, DataWrapper.class)).thenReturn(null);
         assertNull(dataService.getPrefixByRegion("ALL"));
-        verify(restTemplate,times(1)).getForObject("https://ip-ranges.amazonaws.com/ip-ranges.json", DataWrapper.class);
+        verify(restTemplate,times(1)).getForObject(SOURCE_URL, DataWrapper.class);
     }
 
     @Test
     void shouldTestRegionNotValid(){
-        when(restTemplate.getForObject("https://ip-ranges.amazonaws.com/ip-ranges.json", DataWrapper.class)).thenReturn(dummyData);
+        when(restTemplate.getForObject(SOURCE_URL, DataWrapper.class)).thenReturn(dummyData);
         assertNull(dataService.getPrefixByRegion("NOTVALID"));
-        verify(restTemplate,times(1)).getForObject("https://ip-ranges.amazonaws.com/ip-ranges.json", DataWrapper.class);
+        verify(restTemplate,times(1)).getForObject(SOURCE_URL, DataWrapper.class);
     }
 
     @ParameterizedTest
     @ValueSource(strings = { "EU", "US", "CN", "AP", "SA", "AF", "CA"})
     void shouldTestRegionIsValid(String region) {
-
-        when(restTemplate.getForObject("https://ip-ranges.amazonaws.com/ip-ranges.json", DataWrapper.class)).thenReturn(dummyData);
-        // Liste mit einem Element
+        when(restTemplate.getForObject(SOURCE_URL, DataWrapper.class)).thenReturn(dummyData);
         assertEquals(1, dataService.getPrefixByRegion(region).size());
-        verify(restTemplate,times(1)).getForObject("https://ip-ranges.amazonaws.com/ip-ranges.json", DataWrapper.class);
+        verify(restTemplate,times(1)).getForObject(SOURCE_URL, DataWrapper.class);
     }
 
     @Test
     void shouldTestRegionAll() {
-        when(restTemplate.getForObject("https://ip-ranges.amazonaws.com/ip-ranges.json", DataWrapper.class)).thenReturn(dummyData);
+        when(restTemplate.getForObject(SOURCE_URL, DataWrapper.class)).thenReturn(dummyData);
         assertEquals(dummyData.getPrefixes().size(), dataService.getPrefixByRegion("ALL").size());
-        verify(restTemplate,times(1)).getForObject("https://ip-ranges.amazonaws.com/ip-ranges.json", DataWrapper.class);
+        verify(restTemplate,times(1)).getForObject(SOURCE_URL, DataWrapper.class);
     }
 
     @Test
-    void shouldTestRegionIsCorrect() {
-        when(restTemplate.getForObject("https://ip-ranges.amazonaws.com/ip-ranges.json", DataWrapper.class)).thenReturn(dummyData);
+    void shouldTestReturnedRegionIsCorrect() {
+        when(restTemplate.getForObject(SOURCE_URL, DataWrapper.class)).thenReturn(dummyData);
         assertEquals("eu-west-3", dataService.getPrefixByRegion("EU").get(0).getRegion());
-        verify(restTemplate,times(1)).getForObject("https://ip-ranges.amazonaws.com/ip-ranges.json", DataWrapper.class);
+        verify(restTemplate,times(1)).getForObject(SOURCE_URL, DataWrapper.class);
     }
 
     private void initDummyData(){

@@ -20,19 +20,21 @@ import org.springframework.web.client.RestTemplate;
 
 @WebMvcTest(RangeController.class)
 public class ControllerUnitTest {
-
     @Autowired
     private MockMvc mockMvc;
-
     @MockBean
     private DataService dataService;
-
     @MockBean
     private RestTemplate restTemplate;
-
+    
+    @Test
+    public void getDataShouldReturnMimePlainText() throws Exception {
+        when(dataService.getPrefixByRegion("ALL")).thenReturn(null);
+        this.mockMvc.perform(get("/data")).andDo(print()).andExpect(status().isOk()).andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN));
+    }
 
     @Test
-    public void getDataShouldReturnPlainText() throws Exception {
+    public void getDataShouldReturnString() throws Exception {
         when(dataService.getPrefixByRegion("ALL")).thenReturn(null);
         this.mockMvc.perform(get("/data")).andDo(print()).andExpect(status().isOk()).andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN));
     }
